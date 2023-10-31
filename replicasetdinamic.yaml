@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-random
+spec:
+  replicas: 3 # Número de réplicas deseadas
+  selector:
+    matchLabels:
+      app: podrandom
+  template:
+    metadata:
+      labels:
+        app: podrandom
+    spec:
+      containers:
+      - name: contenedorname
+        image: camilonull/random:v5
