@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Disable swap
+sudo swapoff -a
+
+# Comment out swap entry in /etc/fstab
+sudo sed -i '/swap/ s/^\(.*\)$/#\1/g' /etc/fstab
+
+# Load kernel modules
+sudo tee /etc/modules-load.d/containerd.conf <<EOF
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+# Set Kernel parameters for Kubernetes
+sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+# Reload kernel parameters
+sudo sysctl --system
+
+echo "Swap disabled and kernel parameters configured."
+# Instalar dependencias y Containerd
+sudo apt update
+sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install -y containerd.io
+
+# Configurar Containerd para usar Systemd como cgroup
+containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+
+# Reiniciar y habilitar el servicio de Containerd
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+echo "Containerd instalado y configurado correctamente."
+# Add Apt Repository for Kubernetes
+sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/kubernetes-xenial.gpg
+sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+
+# Update repositories
+sudo apt update
+
+# Install Kubernetes components
+sudo apt install -y kubelet kubeadm kubectl
+
+# Hold Kubernetes packages to prevent automatic updates
+sudo apt-mark hold kubelet kubeadm kubectl
+
+echo "Kubernetes components installed and held for updates."
