@@ -36,3 +36,5 @@ spec:
   selector:
     app: mi-aplicacion
 #kubectl autoscale deployment mi-deployment --cpu-percent=50 --min=1 --max=10
+#kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.1; do wget -q -O- http://10.97.251.62:80/random_name; done"
+
