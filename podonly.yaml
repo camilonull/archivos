@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podname
+spec:
+  volumes:
+    - name: mi-volumen
+      persistentVolumeClaim:
+        claimName: mi-pvc-nfs
+  containers:
+    - name: contenedorimage
+      image: camilonull/random:v3
+      volumeMounts:
+        - name: mi-volumen
+          mountPath: /data/
