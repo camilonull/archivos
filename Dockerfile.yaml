@@ -1,0 +1,14 @@
+FROM maven:3.8.3-openjdk-17 as build
+WORKDIR /distribuidos
+
+ARG TOKEN=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
+RUN git clone https://${TOKEN}:@github.com/camilonull/distribuidosApp.git /distribuidos
+RUN mvn clean install
+
+
+FROM openjdk:17-alpine
+EXPOSE 8080
+COPY --from=build /distribuidos/target/*.jar /opt/app.jar
+COPY --from=build /distribuidos/data/* /data/
+
+ENTRYPOINT ["java","-jar","/opt/app.jar"]
