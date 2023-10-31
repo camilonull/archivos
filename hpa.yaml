@@ -1,0 +1,12 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: replicaset-random-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: ReplicaSet
+    name: replicaset-random
+  minReplicas: 3 # Número mínimo de réplicas
+  maxReplicas: 10 # Número máximo de réplicas
+  targetCPUUtilizationPercentage: 70
