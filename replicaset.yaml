@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mi-replicaset
+spec:
+  replicas: 3  # Número deseado de réplicas del Pod
+  selector:
+    matchLabels:
+      app: mi-aplicacion
+  template:
+    metadata:
+      labels:
+        app: mi-aplicacion
+    spec:
+      volumes:
+        - name: mi-volumen
+          persistentVolumeClaim:
+            claimName: mi-pvc-nfs
+      containers:
+        - name: contenedorimage
+          image: camilonull/random:v3
+          volumeMounts:
+            - name: mi-volumen
+              mountPath: /data/
